@@ -2,33 +2,48 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useCartItems } from "../store/zus";
-// import { Heart, X, Plus, Minus, Check, ArrowLeft } from "lucide-react";
 import { IoMdClose } from "react-icons/io";
 import { GoArrowLeft, GoPlus } from "react-icons/go";
 import { AiOutlineMinus } from "react-icons/ai";
 import { useGetCart } from "../hooks/useGetCart";
+import { useNavigate } from "react-router-dom";
 
 const CartPage = () => {
+  const navigate = useNavigate();
   const { setCartItems } = useCartItems();
   const [cart, setCart] = useState([]);
-  const { addToCart, delFromCart, remFromCart } = useGetCart();
+  const [token, setToken] = useState(null);
+
+  const { getUserCart, addToCart, delFromCart, remFromCart } = useGetCart();
   const totalCartPrice = cart.reduce((total, item) => {
     return total + item.menuItem?.price * item.quantity;
   }, 0);
+  useEffect(() => {
+    const storedToken = sessionStorage.getItem("accessToken");
 
-  const getUserCart = async () => {
-    try {
-      const res = await axios.get(`http://localhost:5000/api/cart`, {
-        headers: {
-          Authorization: `Bearer ${JSON.parse(sessionStorage.getItem("accessToken"))}`,
-        },
-      });
-      console.log(res.data?.data);
-      setCartItems(res.data?.data?.items);
-      setCart(res.data?.data?.items);
-      } catch (error) {
-      toast.error(error?.response?.data?.message || error.message);
+    if (storedToken) {
+      setToken(JSON.parse(storedToken));
     }
+  }, []);
+
+  // const getUserCart = async () => {
+  //   try {
+  //     const res = await axios.get(`http://localhost:5000/api/cart`, {
+  //       headers: {
+  //         Authorization: `Bearer ${JSON.parse(sessionStorage.getItem("accessToken"))}`,
+  //       },
+  //     });
+  //     console.log(res.data?.data);
+  //     setCartItems(res.data?.data?.items);
+  //     setCart(res.data?.data?.items);
+  //   } catch (error) {
+  //     toast.error(error?.response?.data?.message || error.message);
+  //   }
+  // };
+  const handleGetUserCart = async() => {
+    const userCart = await getUserCart()
+    setCart(userCart.items);
+    setCartItems(userCart.items)
   };
   const handleAddToCart = async (item) => {
     const updatedCart = await addToCart(item.menuItem?._id);
@@ -36,10 +51,7 @@ const CartPage = () => {
     setCartItems(updatedCart.items);
   };
   const handleDelFromCart = async (item) => {
-    const updatedCart = await delFromCart(
-      item.menuItem?._id,
-      item.quantity,
-    );
+    const updatedCart = await delFromCart(item.menuItem?._id, item.quantity);
     setCart(updatedCart.items);
     setCartItems(updatedCart.items);
   };
@@ -50,8 +62,10 @@ const CartPage = () => {
   };
 
   useEffect(() => {
-    getUserCart();
-  }, []);
+    if (token) {
+      handleGetUserCart();
+    }
+  }, [token]);
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4 md:p-8 font-sans antialiased text-gray-800">
       {/* Outer Card Container */}
@@ -203,7 +217,12 @@ const CartPage = () => {
                 </span>
               </div>
 
-              <button className="bg-[#111] hover:bg-black text-white text-xs md:text-sm font-medium px-6 py-2.5 rounded-full">
+              <button
+                onClick={() => {
+                  navigate("/checkout");
+                }}
+                className="bg-[#111] cursor-pointer hover:bg-black text-white text-xs md:text-sm font-medium px-6 py-2.5 rounded-full"
+              >
                 Check out
               </button>
             </div>

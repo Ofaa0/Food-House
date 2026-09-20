@@ -18,7 +18,7 @@ const GetInTouch = () => {
           <br />
           elementum elit arcu amet nec non eget felis. Eu ut cursus luctus nunc.
         </p>
-        <div className="flex gap-10 justify-center pt-10">
+        <div className="flex flex-col lg:flex-row gap-10 justify-center pt-10">
           <input
             type="email"
             placeholder="Your email"

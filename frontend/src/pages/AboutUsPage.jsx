@@ -94,7 +94,7 @@ export default function AboutUsPage() {
                   className="w-full h-[320px] sm:h-[420px] object-cover transform group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-md text-xs font-bold text-slate-900 flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#e64e43]"></span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#FF1010]"></span>
                   Est. 2010
                 </div>
               </div>
@@ -102,7 +102,7 @@ export default function AboutUsPage() {
 
             {/* Content */}
             <div className="space-y-6">
-              <div className="inline-block px-3.5 py-1.5 rounded-full bg-orange-50 border border-red-300 text-[#FF1010   ] text-xs font-bold uppercase tracking-wider">
+              <div className="inline-block px-3.5 py-1.5 rounded-full bg-orange-50 border border-red-300 text-[#FF1010] text-xs font-bold uppercase tracking-wider">
                 Our Origins
               </div>
               <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">

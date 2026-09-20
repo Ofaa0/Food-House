@@ -1,34 +1,99 @@
-import React, { useState } from 'react';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import { FaCheck, FaStar } from 'react-icons/fa';
+import React, { useEffect, useState } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { FaCheck, FaStar } from "react-icons/fa";
+import { useGetCart } from "../hooks/useGetCart";
+import { useCartItems } from "../store/zus";
+import toast from "react-hot-toast";
+import axios from "axios";
 
 const CheckoutPage = () => {
-  const [paymentMethod, setPaymentMethod] = useState('credit'); // 'credit' | 'paypal'
+  const [paymentMethod, setPaymentMethod] = useState("credit"); // 'credit' | 'paypal'
   const [submitted, setSubmitted] = useState(false);
+  const [cart, setCart] = useState([]);
+  const { setCartItems } = useCartItems();
+  const [token, setToken] = useState(null);
+  const [success , setSuccess] = useState(false)
+  const { getUserCart } = useGetCart();
+  const totalCartPrice = cart.reduce((total, item) => {
+    return total + item.menuItem?.price * item.quantity;
+  }, 0);
+  useEffect(() => {
+    const storedToken = sessionStorage.getItem("accessToken");
+
+    if (storedToken) {
+      setToken(JSON.parse(storedToken));
+    }
+  }, []);
+
+  const handleGetUserCart = async () => {
+    const userCart = await getUserCart();
+    setCart(userCart.items);
+    setCartItems(userCart.items);
+  };
+  useEffect(() => {
+    if (token) {
+      handleGetUserCart();
+    }
+  }, [token,success]);
+
+  const handlePayment = async ({
+    deliveryAddress = "123 Ave, New York, USA",
+    paymentMethod = "Credit Card",
+    shippingFee = 0,
+    discountAmount = totalCartPrice * 0.1,
+    cardDetails,
+  }) => {
+    try {
+      const res = await axios.post(
+        "http://localhost:5000/api/orders/checkout",
+        {
+          deliveryAddress,
+          paymentMethod,
+          shippingFee,
+          discountAmount,
+          cardDetails,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      console.log(res.data);
+      toast.success(res.data?.message)
+      setSuccess(res.data?.success)
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error.message);
+    }
+  };
 
   // Formik Hook with Yup Validation Schema
   const formik = useFormik({
     initialValues: {
-      cardNumber: '999999999999',
-      cardHolder: 'PHAM TRAN LAN CAM NGOC',
-      expirationDate: '',
-      cvc: '',
+      cardNumber: "999999999999",
+      cardHolder: "PHAM TRAN LAN CAM NGOC",
+      expirationDate: "",
+      cvc: "",
       saveCard: true,
     },
     validationSchema: Yup.object({
       cardNumber: Yup.string()
-        .matches(/^[0-9]{12,19}$/, 'Enter a valid card number (12-19 digits)')
-        .required('Card number is required'),
+        .matches(/^[0-9]{12,19}$/, "Enter a valid card number (12-19 digits)")
+        .required("Card number is required"),
       cardHolder: Yup.string()
-        .min(3, 'Card holder name must be at least 3 characters')
-        .required('Card holder name is required'),
+        .min(3, "Card holder name must be at least 3 characters")
+        .required("Card holder name is required"),
       expirationDate: Yup.string()
-        .matches(/^(0[1-9]|1[0-2])\/\d{2}$/, 'Expiration date must be in MM/YY format')
-        .required('Expiration date is required'),
+        .matches(
+          /^(0[1-9]|1[0-2])\/\d{2}$/,
+          "Expiration date must be in MM/YY format",
+        )
+        .required("Expiration date is required"),
       cvc: Yup.string()
-        .matches(/^[0-9]{3,4}$/, 'CVC must be 3 or 4 digits')
-        .required('CVC is required'),
+        .matches(/^[0-9]{3,4}$/, "CVC must be 3 or 4 digits")
+        .required("CVC is required"),
       saveCard: Yup.boolean(),
     }),
     onSubmit: (values, { setSubmitting }) => {
@@ -37,13 +102,20 @@ const CheckoutPage = () => {
         setSubmitting(false);
         setTimeout(() => setSubmitted(false), 4000);
       }, 1000);
+      handlePayment({
+        cardDetails: {
+          cardHolder: values.cardHolder,
+          cardNumber: values.cardNumber,
+          // expirationDate: values.expirationDate,
+          // cvc: values.cvc,
+        },
+      });
     },
   });
 
   return (
     <div className="min-h-screen bg-[#fafafa] flex items-center justify-center p-6 md:p-12 font-sans">
-      <div className="max-w-5xl w-full bg-white rounded-xl shadow-sm p-8 md:p-12 border border-gray-100">
-        
+      <div className="max-w-8xl container w-full bg-white rounded-xl shadow-sm p-8 md:p-12 border border-gray-100">
         {/* Title */}
         <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-8 tracking-tight">
           Confirm and pay
@@ -53,21 +125,23 @@ const CheckoutPage = () => {
         {submitted && (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm flex items-center gap-2">
             <FaCheck />
-            <span>Payment processed successfully! Thank you for your order.</span>
+            <span>
+              Payment processed successfully! Thank you for your order.
+            </span>
           </div>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          
           {/* Left Column: Form Section */}
           <div className="lg:col-span-8 space-y-6">
-            
             {/* Pay With Bar */}
             <div className="border-b border-gray-200 pb-6">
               <div className="flex items-center justify-between mb-4">
-                <span className="text-base font-bold text-gray-900">Pay with</span>
+                <span className="text-base font-bold text-gray-900">
+                  Pay with
+                </span>
                 <div className="flex items-center gap-2">
-                  <button
+                  {/* <button
                     type="button"
                     onClick={() => setPaymentMethod('paypal')}
                     className={`px-3 py-1 text-xs font-semibold rounded-full transition-all ${
@@ -77,14 +151,14 @@ const CheckoutPage = () => {
                     }`}
                   >
                     Paypal
-                  </button>
+                  </button> */}
                   <button
                     type="button"
-                    onClick={() => setPaymentMethod('credit')}
+                    onClick={() => setPaymentMethod("credit")}
                     className={`px-3 py-1 text-xs font-semibold rounded-full transition-all ${
-                      paymentMethod === 'credit'
-                        ? 'bg-main-dark-red text-white'
-                        : 'text-gray-600 hover:text-gray-900'
+                      paymentMethod === "credit"
+                        ? "bg-main-dark-red text-white"
+                        : "text-gray-600 hover:text-gray-900"
                     }`}
                   >
                     Credit Card
@@ -93,7 +167,7 @@ const CheckoutPage = () => {
               </div>
 
               {/* Saved Contact Info Badge */}
-              <div className="mt-4">
+              {/* <div className="mt-4">
                 <p className="text-[10px] font-bold tracking-wider text-gray-400 uppercase mb-2">
                   SAVED CONTACT INFO
                 </p>
@@ -104,12 +178,14 @@ const CheckoutPage = () => {
                   <FaStar className="text-[10px]" />
                   <span>Save</span>
                 </button>
-              </div>
+              </div> */}
             </div>
 
             {/* Credit Card Form */}
             <form onSubmit={formik.handleSubmit} className="space-y-5 pt-2">
-              <h2 className="text-sm font-semibold text-gray-800">Credit Card</h2>
+              <h2 className="text-sm font-semibold text-gray-800">
+                Credit Card
+              </h2>
 
               {/* Card Number */}
               <div>
@@ -125,8 +201,8 @@ const CheckoutPage = () => {
                     onBlur={formik.handleBlur}
                     className={`w-full bg-[#fcfcfc] border ${
                       formik.touched.cardNumber && formik.errors.cardNumber
-                        ? 'border-red-500'
-                        : 'border-gray-300'
+                        ? "border-red-500"
+                        : "border-gray-300"
                     } text-gray-700 py-2.5 px-3.5 pr-10 rounded-lg text-xs font-medium focus:outline-none focus:border-gray-500 transition-colors`}
                   />
                   {!formik.errors.cardNumber && formik.values.cardNumber && (
@@ -136,7 +212,9 @@ const CheckoutPage = () => {
                   )}
                 </div>
                 {formik.touched.cardNumber && formik.errors.cardNumber && (
-                  <p className="mt-1 text-[11px] text-red-500">{formik.errors.cardNumber}</p>
+                  <p className="mt-1 text-[11px] text-red-500">
+                    {formik.errors.cardNumber}
+                  </p>
                 )}
               </div>
 
@@ -153,12 +231,14 @@ const CheckoutPage = () => {
                   onBlur={formik.handleBlur}
                   className={`w-full bg-[#fcfcfc] border ${
                     formik.touched.cardHolder && formik.errors.cardHolder
-                      ? 'border-red-500'
-                      : 'border-gray-300'
+                      ? "border-red-500"
+                      : "border-gray-300"
                   } text-gray-700 py-2.5 px-3.5 rounded-lg text-xs font-semibold focus:outline-none focus:border-gray-500 transition-colors uppercase`}
                 />
                 {formik.touched.cardHolder && formik.errors.cardHolder && (
-                  <p className="mt-1 text-[11px] text-red-500">{formik.errors.cardHolder}</p>
+                  <p className="mt-1 text-[11px] text-red-500">
+                    {formik.errors.cardHolder}
+                  </p>
                 )}
               </div>
 
@@ -176,14 +256,18 @@ const CheckoutPage = () => {
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                     className={`w-full bg-[#fcfcfc] border ${
-                      formik.touched.expirationDate && formik.errors.expirationDate
-                        ? 'border-red-500'
-                        : 'border-gray-300'
+                      formik.touched.expirationDate &&
+                      formik.errors.expirationDate
+                        ? "border-red-500"
+                        : "border-gray-300"
                     } text-gray-700 py-2.5 px-3.5 rounded-lg text-xs font-medium focus:outline-none focus:border-gray-500 transition-colors placeholder-gray-400`}
                   />
-                  {formik.touched.expirationDate && formik.errors.expirationDate && (
-                    <p className="mt-1 text-[11px] text-red-500">{formik.errors.expirationDate}</p>
-                  )}
+                  {formik.touched.expirationDate &&
+                    formik.errors.expirationDate && (
+                      <p className="mt-1 text-[11px] text-red-500">
+                        {formik.errors.expirationDate}
+                      </p>
+                    )}
                 </div>
 
                 <div>
@@ -198,12 +282,14 @@ const CheckoutPage = () => {
                     onBlur={formik.handleBlur}
                     className={`w-full bg-[#fcfcfc] border ${
                       formik.touched.cvc && formik.errors.cvc
-                        ? 'border-red-500'
-                        : 'border-gray-300'
+                        ? "border-red-500"
+                        : "border-gray-300"
                     } text-gray-700 py-2.5 px-3.5 rounded-lg text-xs font-medium focus:outline-none focus:border-gray-500 transition-colors`}
                   />
                   {formik.touched.cvc && formik.errors.cvc && (
-                    <p className="mt-1 text-[11px] text-red-500">{formik.errors.cvc}</p>
+                    <p className="mt-1 text-[11px] text-red-500">
+                      {formik.errors.cvc}
+                    </p>
                   )}
                 </div>
               </div>
@@ -229,11 +315,10 @@ const CheckoutPage = () => {
                   disabled={formik.isSubmitting}
                   className="bg-main-dark-red hover:bg-red-700 text-white text-xs font-semibold py-2.5 px-6 rounded-full shadow-sm hover:shadow transition-all disabled:opacity-50"
                 >
-                  {formik.isSubmitting ? 'Processing...' : 'Confirm and pay'}
+                  {formik.isSubmitting ? "Processing..." : "Confirm and pay"}
                 </button>
               </div>
             </form>
-
           </div>
 
           {/* Right Column: Price Details */}
@@ -241,10 +326,17 @@ const CheckoutPage = () => {
             <h3 className="text-base font-bold text-gray-900">Price details</h3>
 
             <div className="space-y-3 text-xs">
-              <div className="flex justify-between items-center text-gray-600">
-                <span>$20 x 2</span>
-                <span className="font-semibold text-gray-900">$40</span>
-              </div>
+              {cart.map((item) => (
+                <div className="flex justify-between items-center text-gray-600">
+                  <span>
+                    ${item.menuItem?.price.toFixed(2)} x {item.quantity}
+                  </span>
+                  <span>{item.menuItem?.name} </span>
+                  <span className="font-semibold text-gray-900">
+                    ${(item.menuItem?.price * item.quantity).toFixed(2)}
+                  </span>
+                </div>
+              ))}
 
               <div className="flex justify-between items-center text-gray-600">
                 <span>Shipping</span>
@@ -253,13 +345,11 @@ const CheckoutPage = () => {
 
               <div className="flex justify-between items-center bg-[#f4f5f7] p-3 rounded-md font-semibold text-gray-900 mt-2">
                 <span>Total (USD)</span>
-                <span>$68.94</span>
+                <span>${totalCartPrice}</span>
               </div>
             </div>
           </div>
-
         </div>
-
       </div>
     </div>
   );
