@@ -14,6 +14,11 @@ import SingleBlogPage from "./pages/SingleBlogPage";
 import AboutUsPage from "./pages/AboutUsPage";
 import ContactUsPage from "./pages/ContactUsPage";
 import CheckoutPage from "./pages/CheckoutPage";
+import ProfileLayout from "./layouts/ProfileLayout";
+import UserInfoPage from "./pages/UserInfoPage";
+import UpdatePassword from "./pages/UpdatePassword";
+import MyPayments from "./pages/MyPayments";
+import MyOrders from "./pages/MyOrders";
 
 function App() {
   return (
@@ -37,6 +42,12 @@ function App() {
               <Route path="/about" element={<AboutUsPage />}></Route>
               <Route path="/contact" element={<ContactUsPage />}></Route>
               <Route path="/checkout" element={<CheckoutPage />}></Route>
+              <Route path="/my-info" element={<ProfileLayout />}>
+                <Route index element={<UserInfoPage />}></Route>
+                <Route path="update-password" element={<UpdatePassword />}></Route>
+                <Route path="my-payments" element={<MyPayments />}></Route>
+                <Route path="my-orders" element={<MyOrders />}></Route>
+              </Route>
             </Route>
             <Route path="/login" element={<LoginPage />}></Route>
             <Route path="/sign-up" element={<SignupPage />}></Route>
@@ -45,7 +56,10 @@ function App() {
               path="/reset-password/:token"
               element={<ResetPassword />}
             ></Route>
-            <Route path="*" element={<h1 className="text-black">Not found</h1>}></Route>
+            <Route
+              path="*"
+              element={<h1 className="text-black">Not found</h1>}
+            ></Route>
           </Routes>
         </BrowserRouter>
         <Toaster position="top-center" />

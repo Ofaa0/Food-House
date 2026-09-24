@@ -6,7 +6,7 @@ import { IoMdClose } from "react-icons/io";
 import { GoArrowLeft, GoPlus } from "react-icons/go";
 import { AiOutlineMinus } from "react-icons/ai";
 import { useGetCart } from "../hooks/useGetCart";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const CartPage = () => {
   const navigate = useNavigate();
@@ -200,13 +200,13 @@ const CartPage = () => {
           {/* Bottom Bar Footer */}
           <div className="pt-6 px-2 md:px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
             {/* Back Link */}
-            <a
-              href="#shopping"
+            <Link
+              to={'/menu'}
               className="flex items-center gap-2 text-xs md:text-sm font-bold text-gray-900 hover:underline"
             >
               <GoArrowLeft />
               Back to shopping
-            </a>
+            </Link>
 
             {/* Total Price & Checkout Button */}
             <div className="flex items-center gap-4 w-full sm:w-auto justify-end">

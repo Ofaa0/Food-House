@@ -5,15 +5,16 @@ import { LuUserRound } from "react-icons/lu";
 import { HiOutlineMenuAlt4 } from "react-icons/hi";
 import { AiOutlineClose } from "react-icons/ai";
 import { useState } from "react";
-import { useCartItems } from "../store/zus";
+import { useCartItems, useProfileList } from "../store/zus";
+import ProfileMenu from "../components/ProfileMenu";
 
 const Header = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const isLoggedIn = JSON.parse(sessionStorage.getItem("accessToken"));
   const { cartItems } = useCartItems();
-
+  const { toggleProfile } = useProfileList();
   return (
-    <header className="w-full py-5 flex-center relative border-b">
+    <header className="w-full py-5 flex-center relative border-b ">
       <div className="container px-4 lg:px-0 h-full flex justify-between items-center">
         <div className="flex-center ">
           <span>
@@ -24,7 +25,7 @@ const Header = () => {
             />
           </span>
           <nav
-            className={`lg:pl-8 lg:justify-center lg:items-center lg:flex-row lg:gap-8 lg:static fixed inset-0 z-90 flex flex-col gap-4 h-dvh bg-white lg:h-auto py-8 lg:p-0 lg:translate-0  ${!showMobileMenu ? "-translate-y-180" : "translate-y-0"} duration-500`}
+            className={`lg:pl-8 lg:justify-center lg:items-center lg:flex-row lg:gap-8 lg:static fixed inset-0 z-90 flex flex-col gap-4 h-dvh bg-white lg:h-auto py-8 lg:p-0 lg:translate-0  ${!showMobileMenu ? "-translate-y-250" : "translate-y-0"} duration-500`}
           >
             <div className="lg:hidden flex justify-between items-center px-4 pb-4">
               <span>
@@ -64,9 +65,13 @@ const Header = () => {
                   {cartItems.length}
                 </span>
               </Link>
-              <Link to={"/profile"}>
-                <LuUserRound />
-              </Link>
+
+              <span className="relative cursor-pointer">
+                <LuUserRound
+                  onClick={toggleProfile}
+                />
+                <ProfileMenu />
+              </span>
             </div>
           ) : (
             <div className="flex-center gap-4">

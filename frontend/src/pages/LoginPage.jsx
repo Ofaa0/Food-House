@@ -11,10 +11,12 @@ import { LiaEyeSlashSolid, LiaEyeSolid } from "react-icons/lia";
 import { useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { useGetUser } from "../store/zus";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const { setCurrentUser } = useGetUser();
   const handleSubmit = async (values) => {
     console.log(values);
     try {
@@ -26,7 +28,11 @@ const LoginPage = () => {
         },
       );
       console.log(response.data?.data);
-      sessionStorage.setItem("accessToken", JSON.stringify(response.data?.data?.accessToken));
+      sessionStorage.setItem(
+        "accessToken",
+        JSON.stringify(response.data?.data?.accessToken),
+      );
+      setCurrentUser(response.data?.data?.user)
       setTimeout(() => {
         navigate("/");
       }, 1000);
