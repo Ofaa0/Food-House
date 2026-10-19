@@ -4,15 +4,26 @@ import { FiShoppingCart } from "react-icons/fi";
 import { LuUserRound } from "react-icons/lu";
 import { HiOutlineMenuAlt4 } from "react-icons/hi";
 import { AiOutlineClose } from "react-icons/ai";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCartItems, useProfileList } from "../store/zus";
 import ProfileMenu from "../components/ProfileMenu";
+import { RiAdminFill } from "react-icons/ri";
 
 const Header = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const isLoggedIn = JSON.parse(sessionStorage.getItem("accessToken"));
   const { cartItems } = useCartItems();
   const { toggleProfile } = useProfileList();
+  const [currentUser, setCurrentUser] = useState({});
+  const [role, setRole] = useState("");
+  useEffect(() => {
+    if (currentUser)
+      setCurrentUser(JSON.parse(sessionStorage.getItem("currentUser")));
+  }, []);
+  useEffect(() => {
+    if (currentUser) setRole(currentUser.state?.currentUser?.role);
+  }, [currentUser]);
+
   return (
     <header className="w-full py-5 flex-center relative border-b ">
       <div className="container px-4 lg:px-0 h-full flex justify-between items-center">
@@ -59,6 +70,11 @@ const Header = () => {
         <div className="text-black-text flex-center gap-4 lg:gap-8">
           {isLoggedIn ? (
             <div className="flex-center gap-8 text-2xl">
+              {role == "admin" && (
+                <Link to={"/admin"} className="relative cursor-pointer">
+                  <RiAdminFill />
+                </Link>
+              )}
               <Link to={"/cart"} className="relative ">
                 <FiShoppingCart />
                 <span className="absolute -right-3 -top-1 bg-red-600 text-white w-5 h-5 rounded-full flex-center text-[12px]">
@@ -67,9 +83,7 @@ const Header = () => {
               </Link>
 
               <span className="relative cursor-pointer">
-                <LuUserRound
-                  onClick={toggleProfile}
-                />
+                <LuUserRound onClick={toggleProfile} />
                 <ProfileMenu />
               </span>
             </div>

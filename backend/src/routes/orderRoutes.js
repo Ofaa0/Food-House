@@ -5,23 +5,27 @@ const {
   getMyOrders,
   getOrderById,
   getAllOrdersAdmin,
+  getRecentOrdersAdmin,
+  getAdminStats,
   updateOrderStatusAdmin
 } = require('../controllers/orderController');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 
-// جميع المسارات التالية تتطلب تسجيل دخول (Authentication)
+// جميع المسارات التالية تتطلب تسجيل دخول
 router.use(protect);
 
-// 1. User Routes (Static paths first)
+// 1. User Routes
 router.post('/checkout', checkout);
-router.get('/my-orders', getMyOrders); // يفضّل استخدام /my-orders أو التخلي عنها كـ '/' حسب اختيارك
+router.get('/my-orders', getMyOrders);
 router.get('/', getMyOrders);
 
-// 2. Admin Routes (Static paths first)
+// 2. Admin Routes (تم وضعها قبل الـ Dynamic Route لمنع التداخل)
+router.get('/admin/stats', adminOnly, getAdminStats);
+router.get('/admin/orders/recent', adminOnly, getRecentOrdersAdmin);
 router.get('/admin/all', adminOnly, getAllOrdersAdmin);
 router.put('/admin/:id/status', adminOnly, updateOrderStatusAdmin);
 
-// 3. Dynamic Routes (Dynamic :id should always be last)
+// 3. Dynamic Routes (تكون في النهاية دائماً)
 router.get('/:id', getOrderById);
 
 module.exports = router;

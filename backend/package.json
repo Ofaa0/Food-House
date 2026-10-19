@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "Restaurant App Backend Architecture & APIs",
   "main": "src/server.js",
-"scripts": {
-  "start": "node src/server.js",
-  "dev": "nodemon src/server.js",
-  "seed:blogs": "node seeders/blogSeeder.js"
-},
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "seed:blogs": "node seeders/blogSeeder.js"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
@@ -16,6 +16,7 @@
     "express": "^4.22.2",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.24.4",
+    "multer": "^2.4.0",
     "nodemailer": "^9.1.0"
   },
   "devDependencies": {

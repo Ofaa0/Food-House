@@ -30,7 +30,7 @@ const MostPopular = () => {
   return (
     <div className="set-section text-black">
       <div className="container px-4 lg:px-0 h-full">
-        <SectionHeader title="Most Popular" subtitle="Our Exclusive Cakes" />
+        <SectionHeader title="Most Popular" subtitle="Our Exclusive Dishes" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pt-13">
           {popItems.map((item) => (
             <div

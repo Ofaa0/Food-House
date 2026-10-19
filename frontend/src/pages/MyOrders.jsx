@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { FiClock, FiCalendar, FiChevronDown } from "react-icons/fi";
+import { FiClock, FiCalendar } from "react-icons/fi";
 import Modal from "../components/Modal";
 
 const MyOrders = () => {

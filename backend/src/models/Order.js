@@ -38,7 +38,7 @@ const orderSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'],
-      default: 'pending'
+      default: 'confirmed'
     },
     deliveryAddress: { type: String, required: false } // خلّيها false لو بتسجل العنوان من البروفايل
   },
